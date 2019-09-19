@@ -10,4 +10,4 @@ docker pull openanalytics/shinyproxy-demo
 docker-compose up -d
 ```
 
-Login with users in `application.yml`.
+Login with credentials in `application.yml`.
