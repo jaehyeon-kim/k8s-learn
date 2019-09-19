@@ -1,0 +1,2 @@
+https://kubernetes.io/docs/tasks/tools/install-minikube/
+https://computingforgeeks.com/how-to-install-minikube-on-ubuntu-18-04/
