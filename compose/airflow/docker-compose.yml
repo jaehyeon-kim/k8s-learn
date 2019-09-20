@@ -18,6 +18,7 @@ services:
     environment:
       - AIRFLOW_HOME=/usr/local/airflow
       - AIRFLOW__CORE__EXECUTOR=SequentialExecutor
+      - AIRFLOW__CORE__LOAD_EXAMPLES=False
     restart: always
     healthcheck:
       test: ["CMD-SHELL", "[ -f /usr/local/airflow/config/airflow-webserver.pid ]"]
