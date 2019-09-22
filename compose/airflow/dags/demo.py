@@ -3,7 +3,7 @@ from airflow.operators.python_operator import PythonOperator
 from airflow.operators.docker_operator import DockerOperator
 from datetime import datetime
 
-dag = DAG(dag_id="my_first_dag", start_date=datetime(2019, 1, 15), schedule_interval="0 5 * * *")
+dag = DAG(dag_id="test_dag", start_date=datetime(2019, 1, 15), schedule_interval="* * * * *")
 
 
 def print_hello():
@@ -18,7 +18,7 @@ t1 = PythonOperator(task_id="print_hello_world", python_callable=print_hello, da
 
 t2 = DockerOperator(
     task_id="print_hello_docker",
-    image="busybox",
+    image="busybox:latest",
     api_version="auto",
     auto_remove=True,
     volumes=["/var/run/docker.sock:/var/run/docker.sock"],

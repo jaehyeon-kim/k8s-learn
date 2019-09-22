@@ -1,5 +1,15 @@
 version: "3.7"
 services:
+  postgres:
+    image: postgres:11
+    networks:
+      - airflow-net
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=airflow
+      - POSTGRES_PASSWORD=airflow
+      - POSTGRES_DB=airflow
   airflow:
     image: puckel/docker-airflow:1.10.4
     container_name: airflow
@@ -7,7 +17,7 @@ services:
     command: webserver
     networks:
       - airflow-net
-    user: root
+    user: root # for DockerOperator
     volumes:
       - ./requirements.txt:/requirements.txt
       - ./dags:/usr/local/airflow/dags
@@ -17,7 +27,7 @@ services:
       - 8080:8080
     environment:
       - AIRFLOW_HOME=/usr/local/airflow
-      - AIRFLOW__CORE__EXECUTOR=SequentialExecutor
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
       - AIRFLOW__CORE__LOAD_EXAMPLES=False
     restart: always
     healthcheck:
