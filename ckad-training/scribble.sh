@@ -140,3 +140,68 @@ kubectl config set-context $(kubectl config current-context) --namespace=dev
 kubectl get pods --all-namespaces
 
 kubectl create -f 02-core-concepts/compute-quota.yml
+
+######
+###### 03-configuration
+######
+
+# ---
+# FROM Ubuntu
+# ENTRYPOINT ["sleep"]
+# CMD["5"]
+# ---
+## command appended to entrypoint
+# docker run mycontainer # --> sleep 5
+# docker run mycontainer 10 # --> sleep 10 
+# docker run --entrypoint sleepup mycontainer --> sleepup 5
+
+# docker run --name ubuntu-sleeper ubuntu-sleeper
+apiVersion: v1
+kind: Pod
+metadata:
+    name: ubuntu-sleeper-pod
+spec:
+    containers:
+        - name: ubuntu-sleeper
+          image: ubutu-sleeper
+          command: ["sleepup"] # --> ENTRYPOINT
+          args: ["10"] # --> CMD
+
+## Edit a POD
+# Remember, you CANNOT edit specifications of an existing POD other than the below.
+# * spec.containers[*].image
+# * spec.initContainers[*].image
+# * spec.activeDeadlineSeconds
+# * spec.tolerations
+
+# kubectl edit pod myapp-pod
+# need to recreate with a new/updated definition file
+
+kubectl get pod myapp-pod -o yaml > new-myapp-pod.yaml
+kubectl delete pod myapp-pod
+kubectl create -f new-myapp-pod.yaml
+
+## Edit Deployments
+# With Deployments you can easily edit any field/property of the POD template. 
+# Since the pod template is a child of the deployment specification, 
+# with every change the deployment will automatically delete and create a new pod with the new changes. 
+# So if you are asked to edit a property of a POD part of a deployment you may do that simply by running the command
+
+kubectl edit deployment myapp-deployment
+
+## Environment Variables
+spec:
+    containers:
+        - name: ubuntu-sleeper
+          image: ubutu-sleeper
+          command: ["sleepup"] # --> ENTRYPOINT
+          args: ["10"] # --> CMD
+    env:
+        - name: KEY
+          value: VALUE
+        - name: KEY_FROM_CONFIG_MAP
+          valueFrom:
+                configMapKeyRef:
+        - name: KEY_FROM_SECRETS
+          value:
+                secretKeyRef:
