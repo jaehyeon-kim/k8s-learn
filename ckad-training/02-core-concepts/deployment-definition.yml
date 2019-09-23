@@ -1,7 +1,7 @@
 apiVersion: apps/v1
-kind: ReplicaSet
+kind: Deployment
 metadata:
-  name: myapp-replicaset
+  name: myapp-deployment
   namespace: dev
   labels:
     app: myapp
@@ -23,6 +23,8 @@ spec:
             limits:
               memory: "128Mi"
               cpu: "500m"
+          ports:
+            - containerPort: 80
   replicas: 3
   selector: # help minotor when large number of pods
     matchLabels:
