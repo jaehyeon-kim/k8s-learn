@@ -89,9 +89,20 @@ kubectl get nodes
 # NAME       STATUS   ROLES    AGE     VERSION
 # minikube   Ready    master   6m20s   v1.15.2
 
+## SSH
 minikube ssh
 # inside node
 sudo su -
+
+## Setup docker environment
+# minikube docker-env
+# export DOCKER_TLS_VERIFY="1"
+# export DOCKER_HOST="tcp://192.168.99.100:2376"
+# export DOCKER_CERT_PATH="/Users/gouravshah/.minikube/certs"
+# export DOCKER_API_VERSION="1.23"
+
+eval $(minikube docker-env)
+docker ps
 
 minikube stop
 
