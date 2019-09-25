@@ -67,3 +67,4 @@ kubectl apply -f $srcpath/projects/instavote/dev/vote-rs.yml
 # replicaset notes
 #   individually editing a pod doesn't update pod <-- should use deployment
 #   if a pod is terminated (kubectl delete pod/<name>), a new pod will be created
+
