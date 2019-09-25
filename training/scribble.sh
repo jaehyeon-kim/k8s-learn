@@ -1,3 +1,5 @@
+https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.16/
+
 minikube start --memory='20000mb' --cpus=10
 
 ## start minikube
@@ -9,7 +11,9 @@ kubectl apply -f devenv/kube-ops-view/deploy/
 # if minikube
 http://<minikube-ip>:32000/#scale=2.0
 
-watch -n 1 kubectl get pods,deploy,rs,svc
+http://192.168.99.100:32000/#scale=2.0
+
+watch -n 1 kubectl get pods,deploy,rs,svc --show-labels
 
 minikube dashboard
 
@@ -51,3 +55,15 @@ kubectl apply -f $srcpath/projects/instavote/instavote-ns.yml
 
 kubectl config set-context $(kubectl config current-context) --namespace=instavote
 # Context "minikube" modified.
+
+# deploy to new namespace
+kubectl apply -f $srcpath/pods/vote-pod.yml
+
+kubectl get pod vote -o yaml | grep annotations
+
+# --dry-run
+kubectl apply -f $srcpath/projects/instavote/dev/vote-rs.yml
+
+# replicaset notes
+#   individually editing a pod doesn't update pod <-- should use deployment
+#   if a pod is terminated (kubectl delete pod/<name>), a new pod will be created
