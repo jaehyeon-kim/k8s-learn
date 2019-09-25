@@ -17,7 +17,7 @@ http://<minikube-ip>:32000/#scale=2.0
 
 watch -n 1 kubectl get pods,deploy,rs,svc
 
-kubectl apply -f devenv/kube-ops-view/deploy/
+kubectl delete -f devenv/kube-ops-view/deploy/
 ```
 
 ### Resources
