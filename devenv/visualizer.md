@@ -13,7 +13,7 @@ kubectl apply -f kube-ops-view/deploy/
 # kubernetes            ClusterIP   10.96.0.1        <none>        443/TCP        5d17h
 
 # if minikube
-http://<minikube-ip>:32000
+http://<minikube-ip>:32000/#scale=2.0
 
 ```
 
