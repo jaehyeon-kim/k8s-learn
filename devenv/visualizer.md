@@ -4,7 +4,7 @@
 
 ```bash
 #git clone  https://github.com/schoolofdevops/kube-ops-view
-kubectl apply -f kube-ops-view/deploy/
+kubectl apply -f devenv/kube-ops-view/deploy/
 
 # kubectl get svc
 # NAME                  TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)        AGE
@@ -16,6 +16,8 @@ kubectl apply -f kube-ops-view/deploy/
 http://<minikube-ip>:32000/#scale=2.0
 
 watch -n 1 kubectl get pods,deploy,rs,svc
+
+kubectl apply -f devenv/kube-ops-view/deploy/
 ```
 
 ### Resources
