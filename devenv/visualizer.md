@@ -15,6 +15,7 @@ kubectl apply -f kube-ops-view/deploy/
 # if minikube
 http://<minikube-ip>:32000/#scale=2.0
 
+watch -n 1 kubectl get pods,deploy,rs,svc
 ```
 
 ### Resources
