@@ -1,4 +1,8 @@
-minikube start --memory .. --cpu
+minikube start --memory='20000mb' --cpus=10
+
+## start minikube
+minikube start
+
 
 kubectl apply -f devenv/kube-ops-view/deploy/
 
@@ -9,7 +13,8 @@ watch -n 1 kubectl get pods,deploy,rs,svc
 
 minikube dashboard
 
-kubectl apply -f pods/vote-pod.yml
+#### 06 Pods
+kubectl apply -f training/bootcamp/src/pods/vote-pod.yml
 
 kubectl get pods
 kubectl describe pods vote
@@ -24,13 +29,25 @@ kubectl get pod -o yaml
 kubectl port-forward vote 8000:80
 
 #
-kubectl apply -f pods/db-pod.yml
+kubectl apply -f training/bootcamp/src/pods/db-pod.yml
 # check if directory exists in host and mounted in pod
 
-kubectl apply -f pods/multi_container_pod.yml
+kubectl apply -f training/bootcamp/src/pods/multi_container_pod.yml
 
 kubectl exec -it web sh # default nginx
 kubectl exec -it web sh -c sync
 
 kubectl logs web -c nginx
 kubectl logs web -c sync
+
+#### 07 Replacation Controllers and Replica Sets
+export srcpath=training/bootcamp/src
+
+kubectl config view
+kubectl config get-contexts # blank if default
+kubectl get ns
+
+kubectl apply -f $srcpath/projects/instavote/instavote-ns.yml
+
+kubectl config set-context $(kubectl config current-context) --namespace=instavote
+# Context "minikube" modified.
