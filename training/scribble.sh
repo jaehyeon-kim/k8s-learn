@@ -116,3 +116,33 @@ kubectl apply -f $srcpath/projects/instavote/dev/redis-svc.yml
 # voting should work on http://192.168.99.100:30000/
 
 kubectl delete -f $srcpath/projects/instavote/dev/
+
+#### 09 Application Deployments and Updates
+kubectl apply -f $srcpath/projects/instavote/dev/
+
+kubectl rollout status deploy/vote
+# deployment "vote" successfully rolled out
+
+kubectl scale deploy/vote --replicas=3
+# deployment.extensions/vote scaled
+
+## change v1 to v2
+kubectl apply -f $srcpath/projects/instavote/dev/vote-deploy.yml
+# deployment.apps/vote configured
+
+# both v1 and v2 are kept
+kubectl get rs
+# NAME                                    DESIRED   CURRENT   READY   AGE     LABELS
+# replicaset.extensions/redis-7cd9fd75c   2         2         2       9m50s   app=redis,pod-template-hash=7cd9fd75c,role=redis,tier=back,version=latest
+# replicaset.extensions/vote-77bd7ff6c6   2         2         2       2m      app=python,pod-template-hash=77bd7ff6c6,role=vote,version=v2
+# replicaset.extensions/vote-cb68b8bb6    0         0         0       9m13s   app=python,pod-template-hash=cb68b8bb6,role=vote,version=v1
+
+kubectl rollout history deploy/vote
+# deployment.extensions/vote 
+# REVISION  CHANGE-CAUSE
+# 1         <none>
+# 2         <none>
+
+kubectl rollout history deploy/vote --revision=2
+
+kubectl rollout undo deploy/vote --to-revision=2
