@@ -146,3 +146,6 @@ kubectl rollout history deploy/vote
 kubectl rollout history deploy/vote --revision=2
 
 kubectl rollout undo deploy/vote --to-revision=2
+
+
+kubectl logs pod/worker-86f8f46b66-t5d4j

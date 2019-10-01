@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: vote
+  name: worker
   # namespace: instavote
 spec:
   replicas: 1
@@ -12,27 +12,24 @@ spec:
       maxUnavailable: 1
   revisionHistoryLimit: 4
   paused: false
-  minReadySeconds: 10
+  minReadySeconds: 20
   selector:
     matchLabels:
-      role: vote
+      role: worker
     matchExpressions:
-      - { key: version, operator: In, values: [v1, v2, v3] }
+      - { key: version, operator: In, values: [v1, v2, v3, latest] }
   template:
     metadata:
-      name: vote
+      name: worker
       labels:
-        app: python
-        role: vote
-        version: v1
+        app: java
+        role: worker
+        version: latest
     spec:
       containers:
-        - name: app
-          image: schoolofdevops/vote:v1
+        - name: worker
+          image: schoolofdevops/worker:latest
           resources:
             limits:
               memory: "128Mi"
               cpu: "200m"
-          ports:
-            - containerPort: 80
-              protocol: TCP

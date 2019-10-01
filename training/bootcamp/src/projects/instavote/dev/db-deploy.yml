@@ -1,32 +1,31 @@
-apiVersion: apps/v1
+apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: redis
+  name: db
   # namespace: instavote
 spec:
   replicas: 1
   selector:
     matchLabels:
       tier: back
-      role: redis
+      app: postgres
   minReadySeconds: 10
   template:
     metadata:
       labels:
-        app: redis
-        role: redis
+        app: postgres
+        role: db
         tier: back
-        version: latest
+        version: "9.4"
     spec:
       containers:
-        - name: redis
-          image: schoolofdevops/redis:latest
+        - image: postgres:9.4
           imagePullPolicy: Always
+          name: db
+          ports:
+            - containerPort: 5432
+              protocol: TCP
           resources:
             limits:
               memory: "128Mi"
               cpu: "200m"
-          ports:
-            - containerPort: 6379
-              protocol: TCP
-      restartPolicy: Always
