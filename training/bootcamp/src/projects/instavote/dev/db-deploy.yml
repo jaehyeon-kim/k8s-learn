@@ -22,6 +22,17 @@ spec:
         - image: postgres:9.4
           imagePullPolicy: Always
           name: db
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: db
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWD
+              valueFrom:
+                secretKeyRef:
+                  name: db
+                  key: POSTGRES_PASSWD
           ports:
             - containerPort: 5432
               protocol: TCP

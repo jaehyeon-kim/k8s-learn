@@ -149,3 +149,33 @@ kubectl rollout undo deploy/vote --to-revision=2
 
 
 kubectl logs pod/worker-86f8f46b66-t5d4j
+
+#### 10 ConfigMaps and Secrets
+
+## use by envFrom
+kubectl apply -f $srcpath/projects/instavote/dev/vote-cm.yml
+
+kubectl get cm
+kubectl describe cm vote
+
+kubectl apply -f $srcpath/projects/instavote/dev/vote-deploy.yml
+kubectl apply -f $srcpath/projects/instavote/dev/vote-svc.yml
+
+## use by volume
+kubectl create configmap --from-file $srcpath/projects/instavote/config/redis.conf redis
+
+kubectl apply -f $srcpath/projects/instavote/dev/redis-deploy.yml
+kubectl apply -f $srcpath/projects/instavote/dev/redis-svc.yml
+
+echo "admin" | base64
+# YWRtaW4K
+echo "password" | base64
+cGFzc3dvcmQK
+
+kubectl apply -f $srcpath/projects/instavote/dev/db-secrets.yml
+
+kubectl apply -f $srcpath/projects/instavote/dev/db-deploy.yml
+kubectl apply -f $srcpath/projects/instavote/dev/db-svc.yml
+
+## updates on configmap (and secrets) doesn't make pods to update
+## redeploy or update with updated name of them

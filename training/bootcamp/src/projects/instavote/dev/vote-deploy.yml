@@ -29,6 +29,9 @@ spec:
       containers:
         - name: app
           image: schoolofdevops/vote:v1
+          envFrom:
+            - configMapRef:
+                name: vote
           resources:
             limits:
               memory: "128Mi"
