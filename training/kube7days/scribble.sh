@@ -3,7 +3,7 @@
 minikube start \
     --cpus 2 \
     --memory 4096 \
-    --kubernetes-version v1.16.0 \
+    --kubernetes-version v1.15.4 \
     --insecure-registry 10.0.0.0/24
 
 ## addons
