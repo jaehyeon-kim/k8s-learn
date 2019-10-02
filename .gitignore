@@ -2,9 +2,3 @@
 venv
 .pyc
 __pycache__
-
-# shinyproxy
-shinyproxy.log
-
-# airflow
-logs
