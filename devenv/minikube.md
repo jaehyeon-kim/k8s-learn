@@ -5,28 +5,30 @@
 ```bash
 ## https://computingforgeeks.com/how-to-install-minikube-on-ubuntu-18-04/
 
-## update system
+#### update system
 sudo apt-get update \
     && sudo apt-get -y install apt-transport-https
 # sudo apt-get -y upgrade
 
-## install virtualbox hypervisor
+#### install virtualbox hypervisor
 sudo apt install -y virtualbox virtualbox-ext-pack
 
-## download minikube
+#### install minikube
 wget https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64 \
     && chmod +x minikube-linux-amd64 \
     && sudo mv minikube-linux-amd64 /usr/local/bin/minikube
 
 ## check
 minikube version
-# minikube version: v1.3.1
-# commit: ca60a424ce69a4d79f502650199ca2b52f29e631
+# minikube version: v1.4.0
+# commit: 7969c25a98a018b94ea87d949350f3271e9d64b6
 
-## install kubectl
+#### install kubectl
 curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
 echo "deb http://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
 sudo apt update && sudo apt -y install kubectl
+
+# apt-get install --only-upgrade <packagename>
 
 ## check
 kubectl version -o json 
@@ -43,15 +45,35 @@ kubectl version -o json
 #     "platform": "linux/amd64"
 #   }
 # }
-```
 
+#### install helm
+* https://www.digitalocean.com/community/tutorials/how-to-install-software-on-kubernetes-clusters-with-the-helm-package-manager
+* https://helm.sh/docs/using_helm/#installing-helm
+
+curl -L https://git.io/get_helm.sh | sudo bash
+
+#### install kubectx and kubens
+wget https://raw.githubusercontent.com/ahmetb/kubectx/master/kubectx \
+    && chmod +x kubectx \
+    && sudo mv kubectx /usr/local/bin/kubectx
+
+wget https://raw.githubusercontent.com/ahmetb/kubectx/master/kubens \
+    && chmod +x kubens \
+    && sudo mv kubens /usr/local/bin/kubens
+
+#### install kubetail
+wget https://raw.githubusercontent.com/johanhaleby/kubetail/master/kubetail \
+    && chmod +x kubetail \
+    && sudo mv kubetail /usr/local/bin/kubetail
+
+```
 ### Basic operations
 
 ```bash
 ## start minikube
 minikube start
 
-# --kubernetes-version='v1.15.2'
+# --kubernetes-version='v1.16.0'
 # --memory='2000mb'
 # --cpus=2
 # --disk-size='20000mb'
