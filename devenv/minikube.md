@@ -66,6 +66,8 @@ wget https://raw.githubusercontent.com/johanhaleby/kubetail/master/kubetail \
     && chmod +x kubetail \
     && sudo mv kubetail /usr/local/bin/kubetail
 
+#### install jq
+sudo apt-get -y install jq
 ```
 ### Basic operations
 
