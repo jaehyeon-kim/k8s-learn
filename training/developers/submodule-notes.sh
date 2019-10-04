@@ -36,3 +36,7 @@ cat .git/config
 git submodule update --init --recursive
 # subsequently
 git pull --recurse-submodules
+
+cd apps/kfd-flask
+git fetch --tags # git fetch --all
+git checkout tags/first_container
