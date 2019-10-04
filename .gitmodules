@@ -1,9 +1,0 @@
-[submodule "training/developers/modules/kfd-flask"]
-	path = training/developers/modules/kfd-flask
-	url = https://github.com/kubernetes-for-developers/kfd-flask.git
-[submodule "training/developers/modules/kfd-nodejs"]
-	path = training/developers/modules/kfd-nodejs
-	url = https://github.com/kubernetes-for-developers/kfd-nodejs.git
-[submodule "training/developers/modules/kfd-celery"]
-	path = training/developers/modules/kfd-celery
-	url = https://github.com/kubernetes-for-developers/kfd-celery.git
