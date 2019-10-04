@@ -7,3 +7,4 @@ jaeger-client
 prometheus-client
 Flask-Opentracing
 requests
+yq
