@@ -1,1 +1,0 @@
-The code bundle of respective book is placed in the three different repos. You'll find updated code on the GitHub repos.

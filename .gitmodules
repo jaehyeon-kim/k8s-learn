@@ -1,9 +1,0 @@
-[submodule "examples/developers/kfd-flask"]
-	path = examples/developers/kfd-flask
-	url = https://github.com/jaehyeon-kim/kfd-flask.git
-[submodule "examples/developers/kfd-nodejs"]
-	path = examples/developers/kfd-nodejs
-	url = https://github.com/jaehyeon-kim/kfd-nodejs.git
-[submodule "examples/developers/kfd-celery"]
-	path = examples/developers/kfd-celery
-	url = https://github.com/jaehyeon-kim/kfd-nodejs.git
