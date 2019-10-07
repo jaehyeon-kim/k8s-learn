@@ -1,6 +1,6 @@
-git submodule add https://github.com/jaehyeon-kim/kfd-flask.git apps/kfd-flask
-git submodule add https://github.com/jaehyeon-kim/kfd-nodejs.git apps/kfd-nodejs
-git submodule add https://github.com/jaehyeon-kim/kfd-celery.git apps/kfd-celery
+git submodule add https://github.com/jaehyeon-kim/kfd-flask.git examples/developers/kfd-flask
+git submodule add https://github.com/jaehyeon-kim/kfd-nodejs.git examples/developers/kfd-nodejs
+git submodule add https://github.com/jaehyeon-kim/kfd-celery.git examples/developers/kfd-celery
 
 ### remove submodule
 # Delete the relevant line from the .gitmodules file.
@@ -10,14 +10,14 @@ git submodule add https://github.com/jaehyeon-kim/kfd-celery.git apps/kfd-celery
 # Delete the now untracked submodule files.
 
 cat .gitmodules
-# [submodule "apps/kfd-flask"]
-#         path = apps/kfd-flask
+# [submodule "examples/developers/kfd-flask"]
+#         path = examples/developers/kfd-flask
 #         url = https://github.com/jaehyeon-kim/kfd-flask.git
-# [submodule "apps/kfd-nodejs"]
-#         path = apps/kfd-nodejs
+# [submodule "examples/developers/kfd-nodejs"]
+#         path = examples/developers/kfd-nodejs
 #         url = https://github.com/jaehyeon-kim/kfd-nodejs.git
-# [submodule "apps/kfd-celery"]
-#         path = apps/kfd-celery
+# [submodule "examples/developers/kfd-celery"]
+#         path = examples/developers/kfd-celery
 #         url = https://github.com/jaehyeon-kim/kfd-celery.git
 
 cat .git/config
