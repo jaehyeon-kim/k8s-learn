@@ -37,19 +37,21 @@ kubectl run flask \
 
 ## expose pod
 # port forwarding
-kubectl port-forward flask-66dc5c9d7f-zmz6c 5000:5000
+# kubectl get pods | grep flask | cut -d' ' -f1
+export POD=flask-66dc5c9d7f-7prw9
+kubectl port-forward $POD 5000:5000
 
 curl localhost:5000
 
 # kube proxy
 kubectl proxy
 
-curl localhost:8001/api/v1/namespaces/default/pods/flask-66dc5c9d7f-zmz6c
+curl localhost:8001/api/v1/namespaces/default/pods/$POD/
 
-kubectl logs flask-66dc5c9d7f-zmz6c
+kubectl logs $POD
 
 kubectl logs deployment/flask
-kubectl logs deployment/flask -f
+kubectl logs deployment/flask -f # watch
 # --timestamps
 # -p
 
@@ -66,7 +68,11 @@ kubectl run -it python-interactive \
 # Session ended, resume using 'kubectl attach python-interactive-9d57c8d78-95m9t -c python-interactive -i -t' command when the pod is running
 
 ## running a second process in a container
-kubectl exec flask-66dc5c9d7f-8sp5d -it -- /bin/sh
+export POD=flask-66dc5c9d7f-7prw9
+kubectl exec $POD -it -- /bin/sh
+
+kubectl get deployment flask -o yaml
+# --export deprecated
 
 ## common labels
 # environment
@@ -219,13 +225,17 @@ sudo apt-get -y install redis-tools
 kubectl run redis --image=docker.io/redis:alpine
 kubectl expose deploy redis --port=6379 --type=NodePort
 
-kubectl exec -it redis-55f67b886d-k56ld -- /bin/sh
+# check if redis server is running
+export REDIS=redis-55f67b886d-j6pj8
+kubectl exec -it $REDIS -- /bin/sh
 
-redis-cli -h $(minikube ip) -p 30267
+# check redis can be accessed outside cluster
+redis-cli -h $(minikube ip) -p 31279
 # 192.168.99.100:30267> ping
 # PONG
 
-kubectl exec -it flask-66dc5c9d7f-7qcrn -- /bin/sh
+# check if redis can be accessed within cluster
+kubectl exec -it $POD -- /bin/sh
 # / # nslookup redis.default
 # nslookup: can't resolve '(null)': Name does not resolve
 
@@ -248,7 +258,7 @@ kubectl replace -f flask_deployment.yml
 # deployment.extensions/flask replaced
 rm flask_deployment.yml
 
-# kubectl exec -it flask-5d76f4674-zvbpm -- python3
+# kubectl exec -it flask-5d76f4674-bgcqv -- python3
 # import redis
 # redis_db = redis.StrictRedis(host="redis.default", port=6379, db=0)
 # redis_db.ping()
