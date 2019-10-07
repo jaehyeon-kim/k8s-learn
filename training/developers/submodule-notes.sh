@@ -1,6 +1,6 @@
-git submodule add https://github.com/jaehyeon-kim/kfd-flask.git examples/developers/kfd-flask
-git submodule add https://github.com/jaehyeon-kim/kfd-nodejs.git examples/developers/kfd-nodejs
-git submodule add https://github.com/jaehyeon-kim/kfd-celery.git examples/developers/kfd-celery
+git submodule add https://github.com/jaehyeon-kim/kfd-flask.git training/developers/kfd-flask
+git submodule add https://github.com/jaehyeon-kim/kfd-nodejs.git training/developers/kfd-nodejs
+git submodule add https://github.com/jaehyeon-kim/kfd-celery.git training/developers/kfd-celery
 
 ### remove submodule
 # Delete the relevant line from the .gitmodules file.
