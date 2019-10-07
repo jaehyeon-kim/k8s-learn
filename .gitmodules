@@ -1,9 +1,0 @@
-[submodule "apps/kfd-flask"]
-	path = apps/kfd-flask
-	url = https://github.com/jaehyeon-kim/kfd-flask.git
-[submodule "apps/kfd-nodejs"]
-	path = apps/kfd-nodejs
-	url = https://github.com/jaehyeon-kim/kfd-nodejs.git
-[submodule "apps/kfd-celery"]
-	path = apps/kfd-celery
-	url = https://github.com/jaehyeon-kim/kfd-celery.git
