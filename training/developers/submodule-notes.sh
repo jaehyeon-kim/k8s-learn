@@ -40,3 +40,9 @@ git pull --recurse-submodules
 cd apps/kfd-flask
 git fetch --tags # git fetch --all
 git checkout tags/first_container
+
+# To list remote branches:
+git branch -r
+
+# You can check them out as local branches with:
+git checkout -b LocalName origin/remotebranchname
