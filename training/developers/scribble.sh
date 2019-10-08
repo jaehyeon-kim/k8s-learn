@@ -319,3 +319,64 @@ kubectl set image deployment flask flask=quay.io/kubernetes-for-developers/flask
 kubectl annotate deployment flask kubernetes.io/change-cause='deploying image 0.1.1'
 
 kubectl rollout undo deployment flask --to-revision=1
+
+######## Ch4 declarative infrastructure
+kubectl run flask \
+  --image=quay.io/kubernetes-for-developers/flask:0.1.1 \
+  --port=5000
+
+kubectl apply -f deploy/flask.yml --dry-run --validate
+
+kubectl apply -f deploy/flask.yml
+
+# use --save-config with kubectl run or create for automatic annotation 
+#   in order to use with kubectl apply later
+
+# automatic annotation with kubectl apply
+kubectl get deployment flask -o yaml
+# ...
+# metadata:
+#   annotations:
+#     deployment.kubernetes.io/revision: "1"
+#     kubectl.kubernetes.io/last-applied-configuration: |
+#       {"apiVersion":"apps/v1beta1","kind":"Deployment","metadata":{"annotations":{},"labels":{"run":"flask"},"name":"flask","namespace":"default"},"spec":{"template":{"metadata":{"labels":{"app":"flask"}},"spec":{"containers":[{"image":"quay.io/kubernetes-for-developers/flask:0.1.1","name":"flask","ports":[{"containerPort":5000}]}]}}}}
+
+## labels vs annotations
+# Labels are intended to group and organize Kubernetes objects – Pods, Deployments, Services, and so on. 
+# Annotations are intended to provide additional information specific to an instance (or a couple of instances) 
+#   generally as additional data within the annotation itself. 
+
+## access labels and annotations in pods
+# Expose Pod Information to Containers Through Files
+# https://kubernetes.io/docs/tasks/inject-data-application/downward-api-volume-expose-pod-information/
+---
+...
+          volumeMounts:
+            - name: podinfo
+              mountPath: /podinfo
+              readOnly: false
+      volumes:
+        - name: podinfo
+          downwardAPI:
+            items:
+              - path: "labels"
+                fieldRef:
+                  fieldPath: metadata.labels
+              - path: "annotations"
+                fieldRef:
+                  fieldPath: metadata.annotations
+---
+
+kubectl exec -it flask-bc4847889-2fqkv -- /bin/sh
+# / # ls -alt /podinfo/
+# ...
+# lrwxrwxrwx    1 root     root            18 Oct  8 05:08 annotations -> ..data/annotations
+# lrwxrwxrwx    1 root     root            13 Oct  8 05:08 labels -> ..data/labels
+
+# / # cat /podinfo/annotations 
+# kubernetes.io/config.seen="2019-10-08T05:08:24.797415151Z"
+# kubernetes.io/config.source="api"
+# / # cat /podinfo/labels 
+# app="flask"
+# pod-template-hash="bc4847889" 
+
