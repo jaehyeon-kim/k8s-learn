@@ -349,6 +349,8 @@ kubectl get deployment flask -o yaml
 ## access labels and annotations in pods
 # Expose Pod Information to Containers Through Files
 # https://kubernetes.io/docs/tasks/inject-data-application/downward-api-volume-expose-pod-information/
+
+## see ./deploy/04-flask-downwardAPI.yml
 ---
 ...
           volumeMounts:
@@ -380,3 +382,9 @@ kubectl exec -it flask-bc4847889-2fqkv -- /bin/sh
 # app="flask"
 # pod-template-hash="bc4847889" 
 
+# from key-value
+# create config map, --save-confg to work with kubectl apply later
+kubectl create configmap example-config --from-literal=log.level=err --save-config
+
+# from file
+kubectl create configmap iniconfig --from-file config.ini --save-config
