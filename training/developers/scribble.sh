@@ -388,3 +388,7 @@ kubectl create configmap example-config --from-literal=log.level=err --save-conf
 
 # from file
 kubectl create configmap iniconfig --from-file config.ini --save-config
+
+echo -n “admin” > username.txt
+echo -n “sdgp63lkhsgd” > password.txt
+kubectl create secret generic database-creds --from-file=username.txt --from-file=password.txt
