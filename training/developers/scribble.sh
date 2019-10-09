@@ -392,3 +392,35 @@ kubectl create configmap iniconfig --from-file config.ini --save-config
 echo -n “admin” > username.txt
 echo -n “sdgp63lkhsgd” > password.txt
 kubectl create secret generic database-creds --from-file=username.txt --from-file=password.txt
+
+
+kubectl exec $(kubectl get pods -l app=flask -o jsonpath='{.items[*].metadata.name}') \
+-it -- /bin/sh
+
+---
+[features]
+greeting=hello
+debug=true
+---
+---
+# https://docs.python.org/3/library/configparser.html
+from configparser import SafeConfigParser
+from pathlib import Path
+# initialize the configuration parser with all the existing environment variables
+parser = SafeConfigParser(os.environ)
+# parser.get("DEFAULT", "CONFIG_FILE")
+
+config_file = Path(os.environ.get('CONFIG_FILE', "/opt/feature.flags"))
+if config_file.is_file():
+  parser.read(os.environ.get('CONFIG_FILE'))
+
+parser.sections()
+# ['features']
+
+parser.getboolean('features', 'debug')
+# True
+
+if __name__ == 'main':
+  debug_enable = parser.getboolean('features', 'debug', fallback=False)
+  app.run(debug=debug_enable, host='0.0.0.0')
+---
