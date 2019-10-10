@@ -424,3 +424,14 @@ if __name__ == 'main':
   debug_enable = parser.getboolean('features', 'debug', fallback=False)
   app.run(debug=debug_enable, host='0.0.0.0')
 ---
+
+#### ch5
+
+## for graceful shutdown, update sigterm_handler
+# import signal
+# import sys
+
+# def sigterm_handler(_signo, _stack_frame):
+#     sys.exit(0)
+
+# signal.signal(signal.SIGTERM, sigterm_handler)
