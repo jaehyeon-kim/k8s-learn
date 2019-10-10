@@ -34,8 +34,12 @@ cat .git/config
 
 # first time
 git submodule update --init --recursive
-# subsequently
+
+# if cloned from another place
 git pull --recurse-submodules
+
+# if submodule is updated
+git submodule update --recursive --remote
 
 cd apps/kfd-flask
 git fetch --tags # git fetch --all
