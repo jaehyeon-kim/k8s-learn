@@ -435,3 +435,30 @@ if __name__ == 'main':
 #     sys.exit(0)
 
 # signal.signal(signal.SIGTERM, sigterm_handler)
+
+#### ch6
+## Job is immutable while CronJob is mutable
+
+## CronJob examples
+# Minute (0–59)
+# Hour (0–23)
+# Day of Month (1–31)
+# Month (1–12)
+# Day of Week (0–6)
+
+# 12 * * * *: Run every hour at 12 minutes past the hour
+# */5 * * * *: Run every 5 minutes
+# 0 0 * * 0: Run every Saturday at midnight
+
+# @yearly
+# @monthly
+# @weekly
+# @daily
+# @hourly
+
+## celery example
+kubectl run -i --tty \
+  --image quay.io/kubernetes-for-developers/celery-worker:0.4.0 \
+  --restart=Never --image-pull-policy=Always --rm testing /bin/sh
+
+python3 submit_tasks.py

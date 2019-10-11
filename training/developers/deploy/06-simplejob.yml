@@ -1,0 +1,19 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: helloworld
+spec:
+  parallelism: 1
+  completions: 2
+  backoffLimit: 4
+  # ttlSecondsAfterFinished: 6
+  template:
+    metadata:
+      name: helloworld
+    spec:
+      containers:
+        - name: simple
+          image: busybox
+          command: ["/bin/echo", "'hello world'"]
+      restartPolicy: Never
+      terminationGracePeriodSeconds: 0
