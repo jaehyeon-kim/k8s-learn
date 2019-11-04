@@ -13,7 +13,7 @@ kubectl get svc
 
 kubectl scale rc kubia --replicas=3
 
-###### ch03
+###### ch03 Pod
 kubectl get po kubia-5gf9m -o yaml
 
 # check resource and fields
@@ -70,7 +70,7 @@ spec:
 ```
 
 ## annotations
-# more info than labels, not no something like labelSelector
+# more info than labels, no something like labelSelector
 # usually alpha/beta features to annotations, later turns to fields
 # for sharing information
 
@@ -101,3 +101,69 @@ kubectl delete po --all
 
 # all resources will be deleted but not some (eg secrets)
 kubectl delete all --all
+
+###### 04 RC/RS
+
+#### liveness prob
+# HTTP GET
+# TCP socket
+# Exec prob
+
+kubectl create -f inaction/ch04/kubia-liveness-prob.yaml --save-config
+
+# pod updates may not change fields other than 
+#   `spec.containers[*].image`, 
+#   `spec.initContainers[*].image`, 
+#   `spec.activeDeadlineSeconds` or 
+#   `spec.tolerations` (only additions to existing tolerations)
+
+kubectl describe po kubia-liveness
+# Liveness: http-get http://:8080/ delay=0s timeout=1s period=10s #success=1 #failure=3
+
+kubectl explain po.spec.containers.livenessProbe
+
+kubectl logs kubia-liveness
+kubectl logs kubia-liveness --previous
+
+#### RC
+kubectl create -f inaction/ch04/kubia-rc.yaml
+
+# pod no longer managed by RC
+kubectl label po kubia-mgxg4 type=special app=foo --overwrite
+
+# RC allows to change label selector
+
+# adding a new label to pod template doesn't change existing pod
+# new label will be added to new pod
+KUBE_EDITOR="nano" kubectl edit rc kubia
+
+## horizontally scaling
+# change replicas to 10
+KUBE_EDITOR="nano" kubectl edit rc kubia
+
+kubectl scale rc kubia --replicas=3
+
+# delete
+kubectl delete rc kubia
+kubectl delete rc kubia --cascade=false
+
+#### RS
+## RS has more expressive pod selectors
+# selector:
+#   matchLabels:
+#     app: kubia
+
+# expressions - In, NotIn, Exists, DoesNotExists
+# selector:
+#   matchExpressions:
+#     - key: app
+#       operator: IN
+#       values:
+#         - kubia
+
+
+kubectl explain replicaset
+
+## unmanaged pod by RC now managed by RS
+kubectl delete rc kubia --cascade=false
+kubectl create -f inaction/ch04/kubia-replicaset.yaml
