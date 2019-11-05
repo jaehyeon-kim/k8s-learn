@@ -193,3 +193,87 @@ kubectl create -f inaction/ch04/multi-completion-batch-job.yaml
 #### CronJob
 # use --save-config for changing config with kubectl apply
 kubectl create -f inaction/ch04/cronjob.yaml --save-config
+
+###### Ch05 SVC
+#### <-- How services can be consumed by pods
+## kubectl apply -f ... or kubectl create -f ... --save-config
+kubectl apply -f inaction/ch04/kubia-replicaset.yaml
+kubectl apply -f inaction/ch05/kubia-svc.yaml
+
+# cluster ip: 10.111.220.163 <-- accessible inside cluster
+kubectl exec kubia-56q4t -- curl -s http://10.111.220.163
+
+# sessionAffinity: None or ClientIP
+#   - if clientIP, requests from same clientIP goes to same pod
+
+## multiple ports
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: kubia
+# spec:
+#   selector:
+#     app: kubia
+#   ports:
+#     - name: http
+#       port: 80
+#       targetPort: 8080
+#     - name: https
+#       port: 443
+#       targetPort: 8443
+
+## named ports
+kubectl apply -f inaction/ch05/kubia-named-ports.yaml
+
+## service ip and ports by environment variables
+kubectl exec kubia-56q4t env
+# KUBIA_PORT=tcp://10.111.220.163:80
+# KUBIA_PORT_80_TCP=tcp://10.111.220.163:80
+# KUBIA_PORT_80_TCP_PROTO=tcp
+# KUBIA_SERVICE_PORT=80
+
+## service DNS
+kubia.default.svc.cluster.local
+kubia.dafault
+kubia # if in same namespace
+
+kubectl exec kubia-56q4t cat /etc/resolv.conf
+# nameserver 10.96.0.10
+# search default.svc.cluster.local svc.cluster.local cluster.local
+# options ndots:5
+
+kubectl exec -it kubia-56q4t bash
+# root@kubia-56q4t:/# curl http://kubia.default.svc.cluster.local
+# root@kubia-56q4t:/# curl http://kubia.default
+# root@kubia-56q4t:/# curl http://kubia
+
+## service's cluster IP is a virtual IP - can curl but not ping
+
+## services don't link to pods directly but with endpoints
+# pod selector defined in service manifest is used to build a list of IPs and ports
+# then the list is stored in endpoints resource
+# when client makes a request, service proxy selects one of them and redirects
+kubectl get endpoints kubia
+# NAME    ENDPOINTS                                         AGE
+# kubia   172.17.0.6:8080,172.17.0.7:8080,172.17.0.8:8080   9m46s
+
+## service can be created without pod selector
+## endpoints resource needs to provide manual endpoints
+## useful eg) linking external services
+## service and endpoints name should match
+
+#### <-- How to expose services
+### NodePort <- service will be accessible though each of cluster nodes
+### LoadBalancer
+# externalTrafficPolicy: Local <- served by pod within the node
+# if pod not exists, no forwarding
+# if pods not evenly distributed, uneven load distribution
+# but without no network hop, client IP is preserved
+### Ingress
+
+kubectl apply -f inaction/ch05/kubia-svc-nodeport.yaml
+
+# kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="ExternalIP")].address}'
+kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="InternalIP")].address}'
+
+curl http://172.28.175.26:30123
