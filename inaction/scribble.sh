@@ -167,3 +167,29 @@ kubectl explain replicaset
 ## unmanaged pod by RC now managed by RS
 kubectl delete rc kubia --cascade=false
 kubectl create -f inaction/ch04/kubia-replicaset.yaml
+
+kubectl delete rs kubia --cascade=false
+kubectl create -f inaction/ch04/kubia-replicaset-matchexpressions.yaml
+
+#### DaemonSet
+# pod on each node - scheduler not necessary
+
+kubectl create -f inaction/ch04/ssh-monitor-daemonset.yaml
+# pod created as appropriate label added
+kubectl label node minikube disk=ssd
+# pod terminated but not daemonset itself
+kubectl label node minikube disk-
+
+#### Job
+# pods managed by jobs are rescheduled until they finish successfully
+# although completed, pods not deleted
+kubectl create -f inaction/ch04/exporter.yaml
+
+kubectl create -f inaction/ch04/multi-completion-batch-job.yaml
+
+# scale not working?? --> update parallelism
+# kubectl scale job multi-completion-batch-job --replicas 3
+
+#### CronJob
+# use --save-config for changing config with kubectl apply
+kubectl create -f inaction/ch04/cronjob.yaml --save-config
