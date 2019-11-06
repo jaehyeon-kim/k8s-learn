@@ -373,3 +373,47 @@ kubectl exec dnsutils nslookup kubia-headless
 # Address: 172.17.0.8
 # Name:   kubia-headless.default.svc.cluster.local
 # Address: 172.17.0.7
+
+###### ch06
+#### volume types
+# emptyDir
+# hostPath
+# gitRepo
+# nfs
+# configMap, secret, downwardAPI
+# persistentVolumeClaim
+# gcePersistentDisk
+# cinder, cephfs, iscsi, flocker, glusterfs, quobyte, rbd, \
+#      flexVolume, vsphere-Volume, photonPersistentDisk, scaleIO
+
+#### emptyDir
+kubectl apply -f inaction/ch06/fortune-pod.yaml
+kubectl port-forward fortune 8080:80
+
+kubectl exec -it fortune -c web-server sh
+cat /usr/share/nginx/html/index.html
+
+# volumes:
+#   - name: html
+#     emptyDir: {} # {} in filesystem or Memory can also be specified
+
+#### gitRepo
+# gitRepo is only one time cloning
+# to sync or to access private repo, consider sidecar
+kubectl apply -f inaction/ch06/gitrepo-volume-pod.yaml
+
+#### hostPath
+kubectl describe po etcd-minikube -n kube-system
+# ...
+# Volumes:
+#   etcd-certs:
+#     Type:          HostPath (bare host directory volume)
+#     Path:          /var/lib/minikube/certs/etcd
+#     HostPathType:  DirectoryOrCreate
+#   etcd-data:
+#     Type:          HostPath (bare host directory volume)
+#     Path:          /var/lib/minikube/etcd
+#     HostPathType:  DirectoryOrCreate
+# ...
+
+
