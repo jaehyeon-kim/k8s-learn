@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: kubia
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: kubia
+  template:
+    metadata:
+      labels:
+        app: kubia
+    spec:
+      containers:
+        - image: luksa/kubia
+          name: kubia
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            exec:
+              command:
+                - ls
+                - /var/ready

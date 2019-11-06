@@ -262,6 +262,10 @@ kubectl get endpoints kubia
 ## useful eg) linking external services
 ## service and endpoints name should match
 
+inaction/ch05/external-service.yaml
+inaction/ch05/external-service-endpoints.yaml
+inaction/ch05/external-service-externalname.yaml
+
 #### <-- How to expose services
 ### NodePort <- service will be accessible though each of cluster nodes
 ### LoadBalancer
@@ -271,9 +275,101 @@ kubectl get endpoints kubia
 # but without no network hop, client IP is preserved
 ### Ingress
 
+### NodePort
 kubectl apply -f inaction/ch05/kubia-svc-nodeport.yaml
 
 # kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="ExternalIP")].address}'
 kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="InternalIP")].address}'
 
 curl http://172.28.175.26:30123
+
+### LoadBalancer
+inaction/ch05/kubia-svc-loadbalancer.yaml
+
+curl http://<external-ip>:30123
+
+### Ingress
+minikube addons list
+minikube addons enable ingress
+
+kubectl get po --all-namespaces
+
+kubectl get po --all-namespaces | grep ingress
+# kube-system   nginx-ingress-controller-57bf9855c8-55m75    1/1     Running   0          65s
+
+
+kubectl apply -f inaction/ch04/kubia-replicaset.yaml
+kubectl apply -f inaction/ch05/kubia-svc-nodeport.yaml
+kubectl apply -f inaction/ch05/kubia-ingress.yaml
+
+sudo cat /etc/hosts
+# > 172.28.175.26   kubia.example.com
+
+curl http://kubia.example.com -v
+# * Rebuilt URL to: http://kubia.example.com/
+# *   Trying 172.28.175.26... <-- 1. DNS server (or local operating system) returns IP of kubia.example.com
+# * TCP_NODELAY set
+# * Connected to kubia.example.com (172.28.175.26) port 80 (#0)
+# > GET / HTTP/1.1
+# > Host: kubia.example.com <-- 2. Send HTTP request to ingress controller specifiying Host header
+# > User-Agent: curl/7.58.0
+# > Accept: */*
+# >
+# < HTTP/1.1 200 OK <-- 3. ingress resource check endpoints and forward traffic to one of the pods
+# < Server: openresty/1.15.8.1
+# < Date: Wed, 06 Nov 2019 20:20:10 GMT
+# < Transfer-Encoding: chunked
+# < Connection: keep-alive
+# <
+# You've hit kubia-88x6f
+# * Connection #0 to host kubia.example.com left intact
+
+## HTTPS
+openssl genrsa -out inaction/ch05/tls/tls.key 2048
+openssl req -new -x509 -key inaction/ch05/tls/tls.key \
+  -out inaction/ch05/tls/tls.cert -days 360 -subj /CN=kubia.example.com
+
+kubectl create secret tls tls-secret \
+  --cert=inaction/ch05/tls/tls.cert \
+  --key=inaction/ch05/tls/tls.key
+
+kubectl apply -f inaction/ch05/kubia-ingress-tls.yaml
+
+curl -k -v https://kubia.example.com/kubia
+# ...
+# * Server certificate:
+# *  subject: CN=kubia.example.com
+# *  start date: Nov  6 20:32:21 2019 GMT
+# *  expire date: Oct 31 20:32:21 2020 GMT
+# *  issuer: CN=kubia.example.com
+# *  SSL certificate verify result: self signed certificate (18), continuing anyway.
+# ...
+
+#### readiness prob
+# HTTP GET
+# TCP socket
+# Exec prob
+
+## unlike liveness prob, pod not killed
+
+kubectl apply -f inaction/ch04/kubia-replicaset-readinessprob.yaml
+
+kubectl exec kubia-ftfkx -- touch /var/ready
+
+#### headless service
+kubectl apply -f inaction/ch04/kubia-replicaset.yaml
+kubectl apply -f inaction/ch05/kubia-headless.yaml
+
+kubectl run dnsutils --image=tutum/dnsutils \
+  --generator=run-pod/v1 --command -- sleep infinity
+
+kubectl exec dnsutils nslookup kubia-headless
+# Server:         10.96.0.10
+# Address:        10.96.0.10#53
+
+# Name:   kubia-headless.default.svc.cluster.local
+# Address: 172.17.0.9
+# Name:   kubia-headless.default.svc.cluster.local
+# Address: 172.17.0.8
+# Name:   kubia-headless.default.svc.cluster.local
+# Address: 172.17.0.7
