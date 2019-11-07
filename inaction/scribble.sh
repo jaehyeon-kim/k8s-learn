@@ -416,4 +416,42 @@ kubectl describe po etcd-minikube -n kube-system
 #     HostPathType:  DirectoryOrCreate
 # ...
 
+#### PersistentVolumes and PersistentVolumeClaims
+# RWO—ReadWriteOnce—Only a single node can mount the volume for reading and writing.
+# ROX—ReadOnlyMany—Multiple nodes can mount the volume for reading.
+# RWX—ReadWriteMany—Multiple nodes can mount the volume for both reading and writing.
 
+
+kubectl apply -f inaction/ch06/mongodb-pv-hostpath.yaml
+kubectl apply -f inaction/ch06/mongodb-pvc.yaml
+kubectl apply -f inaction/ch06/mongodb-rs-pvc.yaml
+
+kubectl exec -it mongodb-j5khk mongo
+# use mystore
+# db.foo.insert({name: 'foo'})
+# db.foo.find()
+# { "_id" : ObjectId("5dc483fabedaad5a20a415f4"), "name" : "foo" }
+
+kubectl delete po mongodb-j5khk
+
+kubectl exec -it mongodb-h8l8q mongo
+# use mystore
+# db.foo.find()
+# { "_id" : ObjectId("5dc483fabedaad5a20a415f4"), "name" : "foo" }
+
+#### PV
+## persistentVolumeReclaimPolicy: Retain
+# PV status: Avaialble (pv created) -- Bound (pvc created) -- Releases (pvc deleted)
+# when released, cannot be bound to another claim even with the same name
+
+## persistentVolumeReclaimPolicy: Recycle
+# contents deleted when bound claim deleted, can be used by other pods
+
+## persistentVolumeReclaimPolicy: Delete
+# underlying storage is deleted
+
+## reclaim policy can be changed to existing volumes
+
+#### StorageClass
+kubectl apply -f inaction/ch06/storageclass-fast-hostpath.yaml
+kubectl apply -f inaction/ch06/mongodb-pvc-dp.yaml
