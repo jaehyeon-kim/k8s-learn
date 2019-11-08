@@ -453,5 +453,40 @@ kubectl exec -it mongodb-h8l8q mongo
 ## reclaim policy can be changed to existing volumes
 
 #### StorageClass
+# PV - no namespace
+# PVC - namespace
+# SC - no namespace
+
 kubectl apply -f inaction/ch06/storageclass-fast-hostpath.yaml
 kubectl apply -f inaction/ch06/mongodb-pvc-dp.yaml
+
+kubectl describe pv pvc-8190a91b-c240-4539-93ce-c6d03cfb5c11
+# Name:            pvc-8190a91b-c240-4539-93ce-c6d03cfb5c11
+# ...
+# Source:
+#     Type:          HostPath (bare host directory volume)
+#     Path:          /tmp/hostpath-provisioner/pvc-8190a91b-c240-4539-93ce-c6d03cfb5c11
+#     HostPathType:
+
+
+kubectl get sc standard -o yaml
+# apiVersion: storage.k8s.io/v1
+# kind: StorageClass
+# metadata:
+#   annotations:
+#     storageclass.kubernetes.io/is-default-class: "true"
+#   creationTimestamp: "2019-10-21T06:06:46Z"
+#   labels:
+#     addonmanager.kubernetes.io/mode: EnsureExists
+#   name: standard
+#   resourceVersion: "365"
+#   selfLink: /apis/storage.k8s.io/v1/storageclasses/standard
+#   uid: f325ffb6-12b6-470f-ba6e-4cb098d5186d
+# provisioner: k8s.io/minikube-hostpath
+# reclaimPolicy: Delete
+# volumeBindingMode: Immediate
+
+### If PVC 
+### storageClassName: "", it's set to bound to an existing PV
+### no storageClassName, bound to standard (default) storage class
+### storageClassName: "fast" <-- bound to a certain storage class named fast
