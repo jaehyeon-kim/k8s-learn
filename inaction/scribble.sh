@@ -493,3 +493,117 @@ kubectl get sc standard -o yaml
 
 
 ###### ch07
+## configuration options
+##    command line arguments
+##    environment variables
+##    mount config files via volume
+
+# ENTRYPOINT ["node", "app.js"]
+#     PID 1 ==> node app.js
+# ENTRYPOINT node app.js 
+#     PID 1 /bin/sh -c node app.js
+#     PID 7 node app.js
+
+## command line arguments
+# apiVersion: v1
+# kind: Pod
+# metadata: 
+#   name: kubia
+# spec:
+#   containers:
+#     - image: some/image
+#       name: someimage
+#       command: ["/bin/command"] <-- ENTRYPOINT
+#       args: ["arg1", "arg2", "arg3"] <-- CMD
+#    OR args:
+#         - arg1
+#         - arg2
+#         - arg3
+
+kubectl apply -f inaction/ch07/fortune-pod-args.yaml
+
+## environment variables <- better with ConfigMap as values don't need to be hard-coded
+# ...
+# env:
+#   - name: INTERVAL
+#     value: "30"
+#   - name: FIRST_VAR
+#     value: "foo"
+#   - name: SECOND_VAR
+#     value: "$(FIRST_VAR)bar"
+#   - args: ["$(FIRST_VAR)"]
+# ...
+
+kubectl apply -f inaction/ch07/fortune-pod-env.yaml
+
+#### values of ConfigMap can be used as env vars or volume mount
+## from key-value pairs
+kubectl create cm myconfig --from-literal=one=two --from-literal=foo=bar
+kubectl create cm myconfig --from-file=config-file.conf --from-file=customkey=config-file.conf
+kubectl create cm myconfig --from-file=/path/to/dir
+kubectl create cm myconfig \
+  --from-file=foo.json \
+  --from-file=bar=foobar.conf \
+  --from-file=config-opts/ \
+  --from-literal=some=thing
+
+kubectl create cm fortune-config --from-literal=sleep-interval=25
+
+# ...
+# env:
+#   - name: INTERVAL
+#     valueFrom:
+#       configMapKeyRef:
+#         optional: false # or true
+#         name: fortune-config
+#         key: sleep-interval
+# envFrom: # everything with CONFIG_ prefix
+#   - profix: CONFIG_
+#     configMapRef:
+#       name: myconfig
+# args: ["$(INTERVAL)"]
+# ...
+
+# invalid key (eg FOO-BAR) is skipped
+
+kubectl create cm fortune-config --from-file=inaction/ch07/configmap-files
+# kubectl apply -f inaction/ch07/fortune-config-cm1.yaml
+
+kubectl apply -f inaction/ch07/fortune-pod-env-configmap.yaml
+
+
+kubectl apply -f inaction/ch07/fortune-pod-configmap-volume.yaml
+
+kubectl port-forward fortune-configmap-volume 8080:80
+
+curl -H "Accept-Encoding: gzip" -I localhost:8080
+# HTTP/1.1 200 OK
+# Server: nginx/1.17.5
+# Date: Sun, 10 Nov 2019 21:45:35 GMT
+# Content-Type: text/html
+# Last-Modified: Sun, 10 Nov 2019 21:45:32 GMT
+# Connection: keep-alive
+# ETag: W/"5dc884fc-102"
+# Content-Encoding: gzip
+
+kubectl exec fortune-configmap-volume -c web-server ls /etc/nginx/conf.d
+# my-nginx-config.conf
+# sleep-interval
+
+# - image: nginx:alpine
+#   name: web-server
+#   volumeMounts:
+#   - name: config
+#     mountPath: /etc/nginx/conf.d
+#   - name: configItems
+#     mountPaht: /tmp/config
+# volumes:
+# - name: config
+#   configMap:
+#     name: fortune-config
+# - name: configItems
+#   configMap:
+#     name: config-items
+#     items:
+#       - key: config.conf
+#         path: config-path.conf
