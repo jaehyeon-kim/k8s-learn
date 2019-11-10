@@ -417,9 +417,9 @@ kubectl describe po etcd-minikube -n kube-system
 # ...
 
 #### PersistentVolumes and PersistentVolumeClaims
-# RWO—ReadWriteOnce—Only a single node can mount the volume for reading and writing.
-# ROX—ReadOnlyMany—Multiple nodes can mount the volume for reading.
-# RWX—ReadWriteMany—Multiple nodes can mount the volume for both reading and writing.
+# RWO—ReadWriteOnce — Only a single node can mount the volume for reading and writing.
+# ROX—ReadOnlyMany — Multiple nodes can mount the volume for reading.
+# RWX—ReadWriteMany — Multiple nodes can mount the volume for both reading and writing.
 
 
 kubectl apply -f inaction/ch06/mongodb-pv-hostpath.yaml
@@ -490,3 +490,6 @@ kubectl get sc standard -o yaml
 ### storageClassName: "", it's set to bound to an existing PV
 ### no storageClassName, bound to standard (default) storage class
 ### storageClassName: "fast" <-- bound to a certain storage class named fast
+
+
+###### ch07
