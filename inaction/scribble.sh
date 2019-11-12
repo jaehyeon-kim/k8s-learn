@@ -595,15 +595,96 @@ kubectl exec fortune-configmap-volume -c web-server ls /etc/nginx/conf.d
 #   volumeMounts:
 #   - name: config
 #     mountPath: /etc/nginx/conf.d
-#   - name: configItems
-#     mountPaht: /tmp/config
+#   - name: configItem
+#     mountPath: /etc/nginx/conf.d <- only gzip.conf exists
+#   - name: configItem
+#     mountPath: /etc/something.conf
+#     subPath: gzip.conf <- add gzip.conf to /etc/something.conf while keeping existing files
 # volumes:
-# - name: config
+# - name: config <-- all items in config map
 #   configMap:
 #     name: fortune-config
-# - name: configItems
-#   configMap:
-#     name: config-items
+# - name: configItem
+#   configMap: <-- specific items in config map
+#     name: fortune-config
 #     items:
-#       - key: config.conf
-#         path: config-path.conf
+#       - key: my-nginx-config.conf
+#         path: gzip.conf
+
+## file permission on volume - default 644 (-rw-r—r--)
+# volumes:
+#   - name: config
+#     configMap:
+#       name: fortune-config
+#       defaultMode: "6600" <- can be changed
+
+## changes in config map, mounted as volume updates referenced files but may take up to 1 minute
+
+
+# check default secret
+kubectl run -it --rm busybox --image=busybox --restart=Never -- \
+  sh -c "ls /var/run/secrets/kubernetes.io/serviceaccount/"
+
+openssl genrsa -out inaction/ch07/fortune-https/https.key 2048
+openssl req -new -x509 -key inaction/ch07/fortune-https/https.key\
+  -out inaction/ch07/fortune-https/https.cert -days 3650 \
+  -subj /CN=www.kubia-example.com
+
+echo bar > inaction/ch07/fortune-https/foo
+
+kubectl create secret generic fortune-https \
+  --from-file=inaction/ch07/fortune-https
+
+# kubectl create secret generic fortune-https \
+#   --from-file=inaction/ch07/fortune-https/https.key \
+#   --from-file=inaction/ch07/fortune-https/https.cert \
+#   --from-file=inaction/ch07/fortune-https/foo
+
+## secret values are Base64-encoded, string can be added in yaml though
+apiVersion: v1
+kind: Secret
+metadata:
+  name: fortune-https
+stringData:
+  foo: plain-text
+data:
+  https.certs: XXX
+  https:key: XXX
+
+
+kubectl create cm fortune-config --from-file=inaction/ch07/configmap-files
+kubectl create secret generic fortune-https --from-file=inaction/ch07/fortune-https
+kubectl apply -f inaction/ch07/fortune-pod-https.yaml
+
+kubectl port-forward fortune-https 8443:443
+curl https://localhost:8443 -k
+
+## secret volumes are mounted as in-memory filesystem
+kubectl exec fortune-https -c web-server -- mount | grep certs
+tmpfs on /etc/nginx/certs type tmpfs (ro,relatime)
+
+## secret referred as env var
+## not a good practice as app may expose env vars to app log
+# env:
+#   - name: FOO_SECRET
+#     valueFrom:
+#       secretKeyRef:
+#         name: fortune-https
+#         key: foo
+
+## if docker-registry, .dockercfg will be created
+## no volume but include it's name in manifest
+kubectl create secret docker-registry mydockerhubsecret \
+  --docker-username=myusername --docker-password=mypassword \
+  --docker-email=my.email@provider.com
+
+# apiVersion: v1
+# kind: Pod
+# metadata:
+# name: private-pod
+# spec:
+# imagePullSecrets:
+#   - name: mydockerhubsecret
+# containers:
+#   - image: username/private:tag
+# name: main
