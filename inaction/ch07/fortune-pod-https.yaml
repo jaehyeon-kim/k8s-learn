@@ -25,7 +25,7 @@ spec:
           mountPath: /etc/nginx/config.d
           readOnly: true
         - name: certs
-          mountPath: /etc/nginx/certs/
+          mountPath: /etc/nginx/certs
           readOnly: true  
   volumes:
     - name: html

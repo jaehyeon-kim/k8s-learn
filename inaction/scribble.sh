@@ -688,3 +688,33 @@ kubectl create secret docker-registry mydockerhubsecret \
 # containers:
 #   - image: username/private:tag
 # name: main
+
+###### ch08
+
+#### Downward API
+## following info is passed to containers
+## most items via environment vars or downward api
+## but labels and annotations only via downward api
+# The pod’s name
+# The pod’s IP address
+# The namespace the pod belongs to
+# The name of the node the pod is running on
+# The name of the service account the pod is running under
+# The CPU and memory requests for each container
+# The CPU and memory limits for each container
+# The pod’s labels
+# The pod’s annotations
+
+minikube addons enable metrics-server
+
+### ??? set limits.memory not working ???
+kubectl apply -f inaction/ch08/downward-api-env.yaml
+
+kubectl exec downward env
+# HOSTNAME=downward
+# POD_NAME=downward
+# POD_NAMESPACE=default
+# POD_IP=172.17.0.8
+# NODE_NAME=minikube
+# SERVICE_ACCOUNT=default
+# CONTAINER_CPU_REQUEST_MILLICORES=15
