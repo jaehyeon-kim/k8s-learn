@@ -712,9 +712,9 @@ kubectl apply -f inaction/ch08/downward-api-env.yaml
 
 kubectl exec downward env
 # HOSTNAME=downward
+# CONTAINER_MEMORY_LIMIT_KIBIBYTES=65536
 # POD_NAME=downward
 # POD_NAMESPACE=default
-# POD_IP=172.17.0.8
+# POD_IP=172.17.0.6
 # NODE_NAME=minikube
-# SERVICE_ACCOUNT=default
 # CONTAINER_CPU_REQUEST_MILLICORES=15
