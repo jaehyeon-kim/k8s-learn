@@ -707,7 +707,7 @@ kubectl create secret docker-registry mydockerhubsecret \
 
 minikube addons enable metrics-server
 
-### ??? set limits.memory not working ???
+### set limits.memory not working
 kubectl apply -f inaction/ch08/downward-api-env.yaml
 
 kubectl exec downward env
@@ -718,3 +718,172 @@ kubectl exec downward env
 # POD_IP=172.17.0.6
 # NODE_NAME=minikube
 # CONTAINER_CPU_REQUEST_MILLICORES=15
+
+# downward api as volume
+# - only works for labels and annotations
+
+# volumes defined by pod level, not container level
+# add containerName for requests/limists
+# volumes:
+#   - name: downward
+#     downwardAPI:
+#       items:
+#         - path: podName
+#           fieldRef:
+#             fieldPath: metadata.name
+#         - path: containerCpuRequestMilliCores
+#           resourceFieldRef:
+#             containerName: main
+#             resource: requests.cpu
+#             divisor: 1m
+
+# with volume, a container's requests/limits can be passed into another
+# with env var, its own requets/limites can only be passed
+
+kubectl apply -f inaction/ch08/downward-api-volume.yaml
+
+kubectl exec downward -- ls -alt /etc/downward
+
+kubectl exec downward cat /etc/downward/labels
+kubectl exec downward cat /etc/downward/annotations
+
+#### k8s API server
+kubectl proxy
+# Starting to serve on 127.0.0.1:8001
+
+### loop through hierarchy of API server
+curl localhost:8001
+# {
+#   "paths": [
+#     "/api",
+#     "/api/v1",
+#     "/apis",
+#     "/apis/",
+#     ...
+#     "/apis/apps",
+#     "/apis/apps/v1",
+#     ...
+#     "/apis/batch",
+#     "/apis/batch/v1",
+#     "/apis/batch/v1beta1"
+#   ]
+# }
+
+curl localhost:8001/apis/batch
+# {
+#   "kind": "APIGroup",
+#   "apiVersion": "v1",
+#   "name": "batch",
+#   "versions": [
+#     {
+#       "groupVersion": "batch/v1",
+#       "version": "v1"
+#     },
+#     {
+#       "groupVersion": "batch/v1beta1",
+#       "version": "v1beta1"
+#     }
+#   ],
+#   "preferredVersion": {
+#     "groupVersion": "batch/v1",
+#     "version": "v1"
+#   }
+# }
+
+curl localhost:8001/apis/batch/v1
+# {
+#   "kind": "APIResourceList",
+#   "apiVersion": "v1",
+#   "groupVersion": "batch/v1",
+#   "resources": [
+#     {
+#       "name": "jobs",
+#       "singularName": "",
+#       "namespaced": true,
+#       "kind": "Job",
+#       "verbs": [
+#         "create",
+#         "delete",
+#         "deletecollection",
+#         "get",
+#         "list",
+#         "patch",
+#         "update",
+#         "watch"
+#       ],
+#       "categories": [
+#         "all"
+#       ],
+#       "storageVersionHash": "mudhfqk/qZY="
+#     },
+#     {
+#       "name": "jobs/status",
+#       "singularName": "",
+#       "namespaced": true,
+#       "kind": "Job",
+#       "verbs": [
+#         "get",
+#         "patch",
+#         "update"
+#       ]
+#     }
+#   ]
+# }
+
+curl localhost:8001/apis/batch/v1/jobs
+# {
+#   "kind": "JobList",
+#   "apiVersion": "batch/v1",
+#   "metadata": {
+#     "selfLink": "/apis/batch/v1/jobs",
+#     "resourceVersion": "3780"
+#   },
+#   "items": [
+#     {
+#       "metadata": {
+#         "name": "my-job",
+#         "namespace": "default",
+#   ...
+# }
+
+## get a specific job
+curl localhost:8001/apis/batch/v1/namespaces/default/jobs/my-job
+# same output to kubectl get job my-job -o json
+# {
+#   "kind": "Job",
+#   "apiVersion": "batch/v1",
+#   "metadata": {
+#     "name": "my-job",
+#     "namespace": "default",
+#   ...
+# }
+
+#### accessing API server inside pod
+kubectl apply -f inaction/ch08/curl.yaml
+
+kubectl exec -it curl bash
+
+## check env to access by ip and port
+env | grep KUBERNETES_SERVICE
+# KUBERNETES_SERVICE_PORT=443
+# KUBERNETES_SERVICE_HOST=10.96.0.1
+# KUBERNETES_SERVICE_PORT_HTTPS=443
+
+## or use DNS
+curl https://kubernetes # -k if avoid SSL cert verification
+
+# or
+export CURL_CA_BUNDLE=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+export TOKEN=$(cat /var/run/secrets//kubernetes.io/serviceaccount/token)
+
+curl -H "Authorization: Bearer $TOKEN" https://kubernetes
+
+# If you’re using a Kubernetes cluster with RBAC enabled, the service account may not
+# be authorized to access (parts of) the API server.... 
+# For now, the simplest way to allow you to query the API server is to work around RBAC by running the following command:
+kubectl create clusterrolebinding permissive-binding \
+  --clusterrole=cluster-admin \
+  --group=system:serviceaccounts
+
+NS=$(cat /var/run/secrets//kubernetes.io/serviceaccount/namespace)
+curl -H "Authorization: Bearer $TOKEN" https://kubernetes/api/v1/namespaces/$NS/pods
