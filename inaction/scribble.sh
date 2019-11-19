@@ -887,3 +887,16 @@ kubectl create clusterrolebinding permissive-binding \
 
 NS=$(cat /var/run/secrets//kubernetes.io/serviceaccount/namespace)
 curl -H "Authorization: Bearer $TOKEN" https://kubernetes/api/v1/namespaces/$NS/pods
+
+## kube proxy in ambassador
+kubectl apply -f inaction/ch08/curl-with-ambassador.yaml
+
+kubectl exec -it curl-with-ambassador -c main bash
+
+curl localhost:8001
+curl localhost:8001/api/v1/namespaces/default/pods
+
+## python client library
+# https://github.com/kubernetes-client/python
+
+# minikube start --extra-config=apiserver.Features.Enable-SwaggerUI=true
