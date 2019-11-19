@@ -900,3 +900,93 @@ curl localhost:8001/api/v1/namespaces/default/pods
 # https://github.com/kubernetes-client/python
 
 # minikube start --extra-config=apiserver.Features.Enable-SwaggerUI=true
+
+###### ch09
+
+## blue-green deployment
+## service points to old pods while new pods are created
+## once new pods are created, points to them
+## kubectl set selector
+
+## rolling update with rc
+kubectl apply -f inaction/ch09/kubia-rc-and-service-v1.yaml
+
+# while true; do curl http://172.28.175.25:30000; sleep 1; done
+
+kubectl rolling-update kubia-v1 kubia-v2 --image=luksa/kubia:v2
+# Command "rolling-update" is deprecated, use "rollout" instead
+# Created kubia-v2
+# Scaling up kubia-v2 from 0 to 3, scaling down kubia-v1 from 3 to 0 (keep 3 pods available, don't exceed 4 pods)
+# Scaling kubia-v2 up to 1
+# Scaling kubia-v1 down to 2
+# Scaling kubia-v2 up to 2
+# Scaling kubia-v1 down to 1
+# Scaling kubia-v2 up to 3
+# Scaling kubia-v1 down to 0
+# Update succeeded. Deleting kubia-v1
+# replicationcontroller/kubia-v2 rolling updated to "kubia-v2"
+
+## new label added to pod template
+##  - old and new will be different deployment label value
+# kubectl describe rc kubia-v2
+# Name:         kubia-v2
+# Namespace:    default
+# Selector:     app=kubia,deployment=51a729005e77c458297d81cb1da78b83
+# Labels:       app=kubia
+# ...
+# Pod Template:
+#   Labels:  app=kubia
+#            deployment=51a729005e77c458297d81cb1da78b83
+
+## rolling update performed by client (kubectl) rather than k8s master
+## not good - eg) what if network disconnected?
+##          - imperative rather than declarative
+##          - image tag in original manifest won't be updated
+
+#### deployment
+## rs created by deployment add pod-template-hash label
+## deployment creates multiple rs — one for each version of the pod template
+## deploy.spec.strategy.type - RollingUpdate or Recreate
+kubectl create -f inaction/ch09/kubia-deployment-v1.yaml --record
+
+kubectl patch deployment kubia -p '{"spec": {"minReadySeconds": 10}}'
+
+## ways of modifying deployment
+kubectl set image deployment kubia nodejs=luksa/kubia:v2
+kubectl patch deployment kubia -p '{"spec":{"template": {"spec": {"containers": [{"name":"nodejs", "image": "luksa/kubia:v2"}]}}}}'
+# create or update
+kubectl apply -f kubia-deployment-v2.yaml
+# update only - should have existing resource
+kubectl replace -f kubia-deployment-v2.yaml
+
+# while true; do curl http://172.28.175.25:30000; sleep 1; done
+
+## changes in config map doesn't update deployment
+## better to create a different config map
+
+## old rs kept - good for rollout
+kubectl set image deployment kubia nodejs=luksa/kubia:v3
+
+# kubectl rollout status deployment kubia
+
+kubectl rollout undo deployment kubia
+
+kubectl rollout history deployment kubia
+
+kubectl rollout undo deployment kubia --to-revision=1
+
+## revisionHistoryLimit - defaults to 10
+# spec:
+#   strategy:
+#     rollingUpdate:
+#       maxSurge: 1
+#       maxUnavailable: 0
+#   type: RollingUpdate
+
+# maxSurge - % or #, max pods to # replicas during update, default 25%
+# maxUnavailable - % or #, min pods to # replicas during update, default 25%
+
+kubectl set image deployment kubia nodejs=luksa/kubia:v4
+
+kubectl rollout pause deployment kubia
+kubectl rollout resume deployment kubia
