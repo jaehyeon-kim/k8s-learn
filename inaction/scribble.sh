@@ -902,7 +902,6 @@ curl localhost:8001/api/v1/namespaces/default/pods
 # minikube start --extra-config=apiserver.Features.Enable-SwaggerUI=true
 
 ###### ch09
-
 ## blue-green deployment
 ## service points to old pods while new pods are created
 ## once new pods are created, points to them
@@ -939,7 +938,7 @@ kubectl rolling-update kubia-v1 kubia-v2 --image=luksa/kubia:v2
 #            deployment=51a729005e77c458297d81cb1da78b83
 
 ## rolling update performed by client (kubectl) rather than k8s master
-## not good - eg) what if network disconnected?
+## not good - what if network disconnected?
 ##          - imperative rather than declarative
 ##          - image tag in original manifest won't be updated
 
@@ -990,3 +989,33 @@ kubectl set image deployment kubia nodejs=luksa/kubia:v4
 
 kubectl rollout pause deployment kubia
 kubectl rollout resume deployment kubia
+
+## minReadySeconds
+## if new pod is in ready state within minReadySeconds, rollout will be blocked
+## Usually set minReadySeconds to something to make sure pods keep reporting
+##    they’re ready after they’ve already started receiving actual traffic.
+
+## keep --record option
+kubectl apply -f inaction/ch09/kubia-deployment-v1.yaml --record
+# kubectl rollout history deployment kubia
+# deployment.apps/kubia 
+# REVISION  CHANGE-CAUSE
+# 1         kubectl apply --filename=inaction/ch09/kubia-deployment-v1.yaml --record=true
+
+# v3 readiness check fails
+kubectl apply -f inaction/ch09/kubia-deployment-v3-with-readinesscheck.yaml --record
+
+
+kubectl rollout undo deployment kubia
+# deployment.apps/kubia rolled back
+
+kubectl rollout undo deployment kubia --to-revision=1
+# deployment.apps/kubia rolled back
+
+## when updating existing deployment, don't put replicas if don't want to change existing replica
+
+# progressDeadlineSeconds - default 600s
+# fails after 600s
+
+# kubectl rollout history deploy kubia --revision=2
+# kubectl rollout history deploy kubia
