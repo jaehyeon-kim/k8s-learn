@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: kubia-named-ports
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: kubia-named-ports
+  template:
+    metadata:
+      labels:
+        app: kubia-named-ports
+    spec:
+      containers:
+        - image: luksa/kubia
+          name: kubia-named-ports
+          ports:
+            - name: http
+              containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kubia
+spec:
+  selector:
+    app: kubia-named-ports
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
