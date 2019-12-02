@@ -1,3 +1,10 @@
-### Learn Kubernetes (k8s)
+## Learn Kubernetes (k8s)
 
-* [Code from the Kubernetes in Action book](https://github.com/luksa/kubernetes-in-action)
+### Kubernetes in action
+
+* [source](https://github.com/luksa/kubernetes-in-action)
+
+### Kubernetes up and running
+
+* [project](https://github.com/kubernetes-up-and-running)
+* [code](https://github.com/kubernetes-up-and-running/examples)
