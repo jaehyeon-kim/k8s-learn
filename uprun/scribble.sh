@@ -9,7 +9,6 @@ kubectl port-forward kuard 8080:8080
 kubectl exec kuard -- ls -alt data
 
 ######## Ch6 Labels and Annotations
-
 #### labels
 kubectl run alpaca-prod --image=gcr.io/kuar-demo/kuard-amd64:blue \
     --replicas=2 --labels='ver=1,app=alpaca,env=prod'
@@ -61,3 +60,40 @@ kubectl get po -l 'ver=2,!canary'
 # metadata:
 #   annotations:
 #     example.com/icon-url: "https://example.com/icon.png"
+
+######## Ch7 Service Discovery
+# cluster IP is virtual, it is stable, and it is appropriate to give it a DNS address
+# Kubernetes DNS service provides DNS names for cluster IPs
+# <svc-name>.<namespace>.svc.cluster.local
+
+kubectl run alpaca-prod --image=gcr.io/kuar-demo/kuard-amd64:blue \
+    --replicas=3 --port=8080 --labels='ver=1,app=alpaca,env=prod'
+kubectl expose deploy alpaca-prod
+
+kubectl run bandicoot-prod --image=gcr.io/kuar-demo/kuard-amd64:green \
+    --replicas=2 --port=8080 --labels='ver=2,app=bandicoot,env=prod'
+kubectl expose deploy bandicoot-prod
+
+ALPACA_POD=$(kubectl get pods -l app=alpaca -o jsonpath='{.items[0].metadata.name}')
+kubectl port-forward $ALPACA_POD 48858:8080
+
+KUBE_EDITOR="nano" kubectl edit deploy alpaca-prod
+
+        # readinessProbe:
+        #   httpGet:
+        #     path: /ready
+        #     port: 8080
+        #   periodSeconds: 2
+        #   initialDelaySeconds: 0
+        #   failureThreshold: 3
+        #   successThreshold: 1
+
+KUBE_EDITOR="nano" kubectl edit svc alpaca-prod
+
+#   type: NodePort
+#   nodePort: 30000
+
+MINIKUBE_IP=$(kubectl get node -o jsonpath='{.items[0].status.addresses[0].address}')
+echo $MINIKUBE_IP
+
+kubectl delete all -l app
